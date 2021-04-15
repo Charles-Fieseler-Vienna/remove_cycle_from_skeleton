@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from skimage.morphology import skeletonize
 from scipy import sparse
+# import argh
+
+
 
 def _pixel_neighbours(img, p):
     """Returns the indices of the pixel neighbors"""
@@ -70,14 +73,13 @@ def find_intersection_nodes(G, verbose=0):
     # Get intersection node (has degree >2)
     intersections = np.where(np.array(G.degree)[:,1] > 2)[0]
     if len(intersections) > 1:
-        if verbose >= 1:
-            print("Found multiple intersection points... this algorithm may not work")
-    else:
-        intersections = intersections[0]
-        # Convert back to Graph index
-        intersections = list(G.nodes())[intersections]
-        if verbose >= 1:
-            print(f"Found intersection node: {intersections}")
+        print("Found multiple intersection points... this algorithm may not work")
+        print("Trying with only the first intersection node")
+    intersections = intersections[0]
+    # Convert back to Graph index
+    intersections = list(G.nodes())[intersections]
+    if verbose >= 1:
+        print(f"Found intersection node: {intersections}")
     return intersections
     
     
@@ -110,7 +112,7 @@ def test_removing_neighbors(G, head_node, tail_node, intersections, verbose=0):
     return best_deletion
     
     
-def skeletonize_and_remove_cycle(img, head_ij, tail_ij):
+def skeletonize_and_remove_cycle(img, head_ij, tail_ij, to_save=False):
     """
     Skeletonize a binary image and enforce a single path from head to tail
         This path should traverse most of the graph
@@ -138,6 +140,8 @@ def skeletonize_and_remove_cycle(img, head_ij, tail_ij):
     img_new - np.array()
         Skeletonized image with one pixel removed, so that there is only one shortest path
     """
+    if type(img)==str:
+        img = tifffile.imread(img)
     # Skeletonize
     img_sk = skeletonize(np.array(img,dtype=bool))
     # Create graph
@@ -155,4 +159,16 @@ def skeletonize_and_remove_cycle(img, head_ij, tail_ij):
     deletion_ij = np.unravel_index(best_deletion, sz)
     img_new[deletion_ij] = False
     
+    if to_save:
+        fname = 'skeleton_without_cycle.tif'
+        tifffile.imwrite(fname, img_new)
+    
     return img_new
+
+
+##
+## Add cli
+##
+
+# if __name__ == '__main__':
+#     argh.dispatch_command(skeletonize_and_remove_cycle)
