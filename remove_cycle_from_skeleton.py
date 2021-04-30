@@ -152,12 +152,18 @@ def skeletonize_and_remove_cycle(img, head_ij, tail_ij, to_save=False):
     sz = img.shape
     head_node, _ = _find_closest_node_to_coordinates(G, head_ij, sz)
     tail_node, _ = _find_closest_node_to_coordinates(G, tail_ij, sz)
-    intersections = find_intersection_nodes(G)
-    # Remove cycle and produce final image
-    best_deletion = test_removing_neighbors(G, head_node, tail_node, intersections)
-    img_new = img_sk.copy()
-    deletion_ij = np.unravel_index(best_deletion, sz)
-    img_new[deletion_ij] = False
+    try:
+        intersections = find_intersection_nodes(G)
+            
+        # Remove cycle and produce final image
+        best_deletion = test_removing_neighbors(G, head_node, tail_node, intersections)
+        img_new = img_sk.copy()
+        deletion_ij = np.unravel_index(best_deletion, sz)
+        img_new[deletion_ij] = False
+    except:
+        #print('no intersction found')
+        img_new=img_sk
+
     
     if to_save:
         fname = 'skeleton_without_cycle.tif'
