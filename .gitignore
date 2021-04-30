@@ -1,0 +1,5 @@
+*.tif
+checkpoint
+remove_cycle_from_skeleton.cpython-37.pyc
+skeletonization_tests-checkpoint.ipynb
+remove_cycle_from_skeleton-checkpoint.py
